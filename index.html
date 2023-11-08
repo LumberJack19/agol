@@ -21,9 +21,13 @@
       "esri/config",
       "esri/WebMap",
       "esri/views/MapView",
+
+      // adding in the modules for the graphic and graphic layer
+      "esri/Graphic",  
+      "esri/layers/GraphicsLayer",   
       "esri/widgets/ScaleBar",
       "esri/widgets/Legend"
-    ], function(esriConfig, WebMap, MapView, ScaleBar, Legend) {
+    ], function(esriConfig, WebMap, MapView, Graphic, GraphicsLayer, ScaleBar, Legend) {
 
       esriConfig.apiKey = "AAPKab72c25dbc384aab9e39b3c0cdd96876O4xOhb-5OZvyKMjOSbyiDV0Gr61OOXsEK_tlBEFKDLGP-VxWUDAEdr4_tW7mtGlI";
 
@@ -39,7 +43,34 @@
         center: [ -112, 48 ],         // The center of the map as lon/lat
         zoom: 13                      // Sets the zoom level of detail (LOD) to 13
       });
+      //adding the constructor for the graphics layer
+      const graphicsLayer = new GraphicsLayer();  
+      map.add(graphicsLayer);
+      //defining the geometry of the point
+      const point = { //Create a point  
+      type: "point",  
+      longitude: -97.750689,    //long lat of Stevie Ray Vaughan Statue
+      latitude: 30.263098
+      };
 
+      //defining the marker style
+      const simpleMarkerSymbol = {  
+      type: "simple-marker",  
+      color: [0, 0, 139],  // Color of blues rock
+      outline: {  
+        color: [255, 255, 255], // White  
+        width: 1
+      }  
+      };
+
+      //creating the point graphic
+      const pointGraphic = new Graphic({  
+      geometry: point,  
+      symbol: simpleMarkerSymbol  
+      });
+      //adding the point to the graphics layer
+      graphicsLayer.add(pointGraphic);
+      //adding scalebar
       const scalebar = new ScaleBar({
         view: view
       });
