@@ -1,0 +1,52 @@
+.center {
+    padding: 70px 0;
+    text-align: center;
+  }
+  div {
+	background-color: #9bece6bb;
+	#div-main {
+        background-color: #666;
+        }
+        
+        #div-main p {
+        color: #fff;
+        }
+    
+        .div-special {
+        background-color: #333;
+        }
+    
+        .div-special p {
+        color: #ccc;
+        }	
+}
+  h1 {
+		color: #004d4d;
+		font-size: 50px;
+        font-family: bahnschrift;
+		}
+    h2 {
+        color: #00ff00;
+        text-align: center;
+    }
+    h3 {
+        color: #000000;
+        text-align: center;
+    }
+img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    }
+    .clearfix::after {
+        content: "";
+        clear: both;
+        display: table;
+      }
+      /* If the text has multiple lines, add the following: */
+.center p {
+    line-height: 1.5;
+    display: inline-block;
+    vertical-align: middle;
+  }
