@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>ArcGIS Maps SDK for Rocky Mountain National Park</title>
+
+<style>
+    html, body, #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.28/"></script>
+
+  <script>
+require([ "esri/config", 
+          "esri/Map", 
+          "esri/views/MapView", 
+          "esri/Graphic", 
+          "esri/layers/GraphicsLayer", 
+          "esri/layers/FeatureLayer",
+          "esri/widgets/Editor",
+          "esri/widgets/ScaleBar", 
+          "esri/widgets/Legend" ], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, Editor, ScaleBar, Legend) { // function body
+      
+      //API key goes here
+      esriConfig.apiKey = "AAPKab72c25dbc384aab9e39b3c0cdd96876O4xOhb-5OZvyKMjOSbyiDV0Gr61OOXsEK_tlBEFKDLGP-VxWUDAEdr4_tW7mtGlI";
+      //swap webMap out at any point with Map
+      const map = new  Map({ //change at any point from WebMapto webmap
+        // portalItem: {
+        //   id: "41281c51f9de45edaf1c8ed44bb10e30"
+        // },
+        basemap: "arcgis-topographic" // Basemap layer
+        });
+
+      const view = new MapView({    
+        container: "viewDiv",
+        map: map, //matches line 32 const webmap
+        center: [ -105.75, 30.27 ],         // The center of the map as lon/lat
+        zoom: 13                      // Sets the zoom level of detail (LOD) to 13
+      });
+      //adding the constructor for the graphics layer
+      const graphicsLayer = new GraphicsLayer();  
+      map.add(graphicsLayer);
+
+      //defining the geometry of the point
+      const point = { //Create a point  
+      type: "point",  
+      longitude: -97.750689,    //long lat of Stevie Ray Vaughan Statue
+      latitude: 30.263098
+      };
+
+      //defining the marker style
+      const simpleMarkerSymbol = {  
+      type: "simple-marker",  
+      color: [0, 0, 139],  // Color of blues rock
+      outline: {  
+        color: [255, 255, 255], // White  
+        width: 1
+        }  
+      };
+      //defining popup properties
+      const popupTemplate = {
+        title: "{Name}",
+        content: "{Description}"
+      }
+      const attributes = {
+        Name: "Stevie Ray Vaughan Statue",
+        Description: "A bronze sculpture of Stevie Ray Vaughan by Ralph Helmick"
+      }
+
+      //creating the point
+      const pointGraphic = new Graphic({  
+      geometry: point,  
+      symbol: simpleMarkerSymbol,
+      //adding popup properties
+      attributes: attributes, // Include attributes here
+      popupTemplate: popupTemplate, // Include popupTemplate here
+      longitude: -106.40,
+      latitude: 40.20
+      });
+
+      //adding the point to the graphics layer
+      graphicsLayer.add(pointGraphic);
+
+      // Define a pop-up for usaeduLayer
+      const popupEduusa = {
+        "title": "EDUs",
+        "content": "<b>Name:</b> {NAME}<br><b>Total Enrollment:</b> {TOT_ENROLL}<br>"
+    }
+
+      //adding the constructor for the feature layer
+      const usaeduLayer = new FeatureLayer({
+      url: "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Colleges_and_Universities_View/FeatureServer"
+      ,//adding the popup here
+      outFields: ["NAME","TOT_ENROLL"],
+      popupTemplate: popupEduusa  
+    });
+
+    
+
+      //adding the feature layer to the map
+      map.add(usaeduLayer);
+      
+      //setting up the icon
+      const airportRenderer = {
+        "type": "simple",
+        "symbol": {
+          "type": "picture-marker",
+          "url": "https://github.com/LumberJack19/agol/blob/main/outline_airplanemode_active_black_24dp.png",
+          "width": "18px",
+          "height": "18px"
+        }
+      }
+
+        const airportLayer = new FeatureLayer({
+            url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports/FeatureServer",
+            renderer: airportRenderer
+        });
+      //adding the feature layer to the map
+      map.add(airportLayer);
+        
+      //adding the const for the feature layer
+      const myAirports = new FeatureLayer({
+      url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Make_your_own_airport/FeatureServer",
+      
+      //adding the popup here
+      outFields: ["AirportCode"],
+
+      });
+
+      //adding the feature layer to the map
+      map.add(myAirports);
+
+
+      // Set the point layer's LayerInfo
+      const pointInfos = {
+      layer: myAirports
+      }
+
+      // Begin Editor constructor
+      const editor = new Editor({
+      view: view,
+      layerInfos: [pointInfos]
+      }); // End Editor constructor
+
+      // Add the widget to the view
+      view.ui.add(editor, "top-right");
+
+      //adding scalebar
+      const scalebar = new ScaleBar({
+        view: view
+      });
+
+      view.ui.add(scalebar, "bottom-left");
+
+      const legend = new Legend ({
+        view: view
+      });
+      view.ui.add(legend, "top-right");
+});
+  </script>
+</head>
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>
