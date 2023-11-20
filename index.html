@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>ArcGIS Maps SDK for Oympia National Park</title>
-
-<style>
+    <title>ArcGIS Maps SDK for Rocky Mountain National Park</title>
+    <link rel="stylesheet" href="css/style.css">
+  <style>
     html, body, #viewDiv {
       padding: 0;
       margin: 0;
@@ -17,59 +17,192 @@
   <script src="https://js.arcgis.com/4.28/"></script>
 
   <script>
-    require([
-      "esri/config",
-      "esri/WebMap",
-      "esri/views/MapView",
-
-      // adding in the modules for the graphic and graphic layer
-      "esri/Graphic",  
-      "esri/layers/GraphicsLayer",   
-      "esri/widgets/ScaleBar",
-      "esri/widgets/Legend"
-    ], function(esriConfig, WebMap, MapView, Graphic, GraphicsLayer, ScaleBar, Legend) {
-
+require([ //gen esri
+          "esri/config", 
+          "esri/Map", 
+          "esri/views/MapView",
+          "esri/Graphic",
+          //layers
+          "esri/layers/GraphicsLayer", 
+          "esri/layers/FeatureLayer",
+          //widgets
+          "esri/widgets/Editor",
+          "esri/widgets/Locate",
+          "esri/widgets/ScaleBar", 
+          "esri/widgets/Legend" ], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, Editor, Locate, ScaleBar, Legend) { // function body
+      
+      //API key goes here
       esriConfig.apiKey = "AAPKab72c25dbc384aab9e39b3c0cdd96876O4xOhb-5OZvyKMjOSbyiDV0Gr61OOXsEK_tlBEFKDLGP-VxWUDAEdr4_tW7mtGlI";
+      //swap webMap out at any point with Map
+      const map = new  Map({ //change at any point from WebMapto webmap
+        // portalItem: {
+        //   id: "41281c51f9de45edaf1c8ed44bb10e30"
+        // },
+        basemap: "arcgis-topographic" // Basemap layer
+        });
 
-      const webmap = new WebMap({
-        portalItem: {
-          id: "41281c51f9de45edaf1c8ed44bb10e30"
-        }
-      });
-
-      const view = new MapView({
+      const view = new MapView({    
         container: "viewDiv",
-        map: webmap,
-        center: [ -112, 48 ],         // The center of the map as lon/lat
+        map: map, //matches line 32 const webmap
+        center: [ -105.75, 40.26 ],         // The center of the map as lon/lat
         zoom: 13                      // Sets the zoom level of detail (LOD) to 13
       });
       //adding the constructor for the graphics layer
       const graphicsLayer = new GraphicsLayer();  
       map.add(graphicsLayer);
+
       //defining the geometry of the point
       const point = { //Create a point  
       type: "point",  
-      longitude: -97.750689,    //long lat of Stevie Ray Vaughan Statue
-      latitude: 30.263098
+      longitude: -105.750689,    //long lat of RMNP
+      latitude: 40.263098
       };
 
       //defining the marker style
       const simpleMarkerSymbol = {  
       type: "simple-marker",  
-      color: [0, 0, 139],  // Color of blues rock
+      color: [102, 0, 102],  // Purple is a fine color for a national park
       outline: {  
         color: [255, 255, 255], // White  
         width: 1
-      }  
+        }  
       };
+      //defining popup properties
+      const popupTemplate = {
+        title: "{Name}",
+        content: "{Description}"
+      }
+      const attributes = {
+        Name: "Rocky Mountain National Park",
+        Description: "This is the location of the park visitor center"
+      }
 
-      //creating the point graphic
+      //creating the point
       const pointGraphic = new Graphic({  
-      geometry: point,  
-      symbol: simpleMarkerSymbol  
+      geometry: point,
+      symbol: simpleMarkerSymbol,
+      //adding popup properties
+      attributes: attributes, // Include attributes here
+      popupTemplate: popupTemplate, // Include popupTemplate here
+      longitude: -106.40,
+      latitude: 40.20
       });
+
       //adding the point to the graphics layer
       graphicsLayer.add(pointGraphic);
+
+      // Define a pop-up for rmnpSummitsLayer & other layers
+      const rmnpFeaturePopup = {
+        "title": "Summits",
+        "content": "<b>Name:</b> {FEATURE_NA}<br><b>Type:</b> {FEATURE_CL}<br>"
+    }
+      //adding the constructor for the feature layer
+      const rmnpOutlineLayer = new FeatureLayer({
+    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/RMNP___Land_Resources_Division_Boundary_and_Tract_Data_Service/FeatureServer"
+      ,//adding the popup here
+      outFields: ["UNIT_NAME"],
+      popupTemplate: rmnpFeaturePopup  
+    });
+
+
+      //adding the feature layer to the map
+      map.add(rmnpOutlineLayer);
+      //setting up the icon
+      const summitRenderer = {
+        "type": "simple",
+        "symbol": {
+          "type": "picture-marker",
+          "url": "http://127.0.0.1:5500/img/mountain_flag_FILL0_wght400_GRAD0_opsz24.png",
+          "width": "18px",
+          "height": "18px"
+        }
+      }
+      //adding the constructor for the feature layer
+      const rmnpSummitsLayer = new FeatureLayer({
+        url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Rocky_Mountain_National_Park___Summits/FeatureServer"
+        ,//adding the popup here
+        outFields: ["FEATURE_NA","FEATURE_CL"],
+        popupTemplate: rmnpFeaturePopup,
+        renderer: summitRenderer
+      });
+
+      //adding the feature layer to the map
+      map.add(rmnpSummitsLayer);
+      const campsitesRenderer = {
+        "type": "simple",
+        "symbol": {
+          "type": "picture-marker",
+          "url": "http://127.0.0.1:5500/img/outline_bungalow_24dp.png",
+          "width": "18px",
+          "height": "18px"
+        }
+      }
+      const rmnpCampsitesPopup = {
+        "title": "Where to set up camp?",
+        "content": "<b>Campground:</b> {Campground}<br><b>Site number:</b> {SiteNum}<br>"
+    }
+        //adding the constructor for the feature layer
+        const rmnpCampsitesLayer = new FeatureLayer({
+        url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Rocky_Mountain_National_Park___Campsites_Frontcountry/FeatureServer"
+        ,//adding the popup here
+        outFields: ["Campground","SiteNum"],
+        popupTemplate: rmnpCampsitesPopup,
+        renderer: campsitesRenderer
+      });
+
+      //adding the feature layer to the map
+      map.add(rmnpCampsitesLayer);
+
+        //adding the constructor for the feature layer
+        const rmnpTrailsLayer = new FeatureLayer({
+        url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Rocky_Mountain_Trails/FeatureServer"
+        ,//adding the popup here
+        outFields: ["TRLNAME","TRLSTATUS","UNITNAME"],
+        popupTemplate: rmnpFeaturePopup  
+      });
+
+      //adding the feature layer to the map
+      map.add(rmnpTrailsLayer);
+
+      //add user input layer here
+      const rmnpMyTrailsPopup = {
+        "title": "This is my favorite trail:",
+        "content": "<b>Trail Name:</b> {TrailName}<br><b>Trail Notes:</b> {TrailNotes}<br>"
+    }
+      //adding the const for the feature layer
+      const myTrails = new FeatureLayer({
+      url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/My_Trails/FeatureServer",
+      //adding the popup here
+      outFields: ["TrailName", "TrailID","TrailNotes"],
+      popupTemplate: rmnpMyTrailsPopup
+    });
+
+      //adding the feature layer to the map
+      map.add(myTrails);
+
+      // Set the point layer's LayerInfo
+      const pointInfos = {
+      layer: myTrails
+      }
+
+// Begin Editor constructor
+const editor = new Editor({
+view: view,
+layerInfos: [pointInfos]
+}); // End Editor constructor
+
+// Add the widget to the view
+view.ui.add(editor, "top-right");
+      //locate widget
+      let locateWidget = new Locate({
+      view: view,   // Attaches the Locate button to the view
+      graphic: new Graphic({
+        symbol: { type: "simple-marker" }  // overwrites the default symbol used for the
+        // graphic placed at the location of the user when found
+      })
+    });
+//query for trails
+view.ui.add(locateWidget, "top-right");
       //adding scalebar
       const scalebar = new ScaleBar({
         view: view
@@ -81,11 +214,14 @@
         view: view
       });
       view.ui.add(legend, "top-right");
-
-  });
+});
   </script>
 </head>
 <body>
+  <div id="header">
+    <h1>Rocky Mountain National Park</h1>
+  </div>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light"></nav>
   <div id="viewDiv"></div>
 </body>
 </html>
